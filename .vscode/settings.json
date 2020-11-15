@@ -1,0 +1,7 @@
+{
+    "terminal.integrated.shell.linux": "/bin/bash",
+    "files.autoSave": "onFocusChange",
+    "python.linting.flake8Enabled": true,
+    "python.linting.enabled": true,
+
+}
