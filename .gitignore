@@ -117,3 +117,6 @@ venv.bak/
 
 # ngrok
 ngrok*
+
+# cifar 10 data
+cifar-10*
