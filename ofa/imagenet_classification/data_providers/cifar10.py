@@ -17,7 +17,7 @@ __all__ = ["Cifar10DataProvider"]
 
 
 class Cifar10DataProvider(DataProvider):
-    DEFAULT_PATH = "/content/cifar-10-batches-py"
+    DEFAULT_PATH = "/content"
 
     def __init__(
         self,
@@ -158,14 +158,14 @@ class Cifar10DataProvider(DataProvider):
 
     @property
     def n_classes(self):
-        return 1000
+        return 10
 
     @property
     def save_path(self):
         if self._save_path is None:
             self._save_path = self.DEFAULT_PATH
             if not os.path.exists(self._save_path):
-                self._save_path = os.path.expanduser("~/dataset/imagenet")
+                raise FileNotFoundError
         return self._save_path
 
     @property
@@ -173,18 +173,16 @@ class Cifar10DataProvider(DataProvider):
         raise ValueError("unable to download %s" % self.name())
 
     def train_dataset(self, _transforms):
-        return datasets.ImageFolder(self.train_path, _transforms)
+        # Assume we have data on disc
+        return datasets.CIFAR10(
+            self.save_path, train=True, transform=_transforms, download=False
+        )
 
     def test_dataset(self, _transforms):
-        return datasets.ImageFolder(self.valid_path, _transforms)
-
-    @property
-    def train_path(self):
-        return os.path.join(self.save_path, "train")
-
-    @property
-    def valid_path(self):
-        return os.path.join(self.save_path, "val")
+        # Assume we have data on disc
+        return datasets.CIFAR10(
+            self.save_path, train=False, transform=_transforms, download=False
+        )
 
     @property
     def normalize(self):
