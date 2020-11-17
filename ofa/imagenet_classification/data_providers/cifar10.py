@@ -13,8 +13,6 @@ import torchvision.datasets as datasets
 from .base_provider import DataProvider
 from ofa.utils.my_dataloader import MyRandomResizedCrop, MyDistributedSampler
 
-__all__ = ["Cifar10DataProvider"]
-
 
 class Cifar10DataProvider(DataProvider):
     DEFAULT_PATH = "/content"
