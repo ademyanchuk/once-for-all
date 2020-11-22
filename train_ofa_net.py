@@ -136,14 +136,15 @@ args.base_stage_width = "proxyless"
 args.width_mult_list = "1.0"
 args.independent_distributed_sampling = False
 
-args.kd_ratio = 1.0
 args.kd_type = "ce"
 
 # for different params in supernet task
 if args.task == "supernet":
     args.dy_conv_scaling_mode = -1
+    args.kd_ratio = -1.0  # not using teacher model
 else:
     args.dy_conv_scaling_mode = 1
+    args.kd_ratio = 1.0
 
 
 if __name__ == "__main__":
@@ -198,29 +199,40 @@ if __name__ == "__main__":
         args.dy_conv_scaling_mode = None
     DynamicSeparableConv2d.KERNEL_TRANSFORM_MODE = args.dy_conv_scaling_mode
 
-    # build net from args
-    args.width_mult_list = [
-        float(width_mult) for width_mult in args.width_mult_list.split(",")
-    ]
-    args.ks_list = [int(ks) for ks in args.ks_list.split(",")]
-    args.expand_list = [int(e) for e in args.expand_list.split(",")]
-    args.depth_list = [int(d) for d in args.depth_list.split(",")]
+    if args.task == "supernet":
+        net = MobileNetV3Large(
+            n_classes=run_config.data_provider.n_classes,
+            bn_param=(args.bn_momentum, args.bn_eps),
+            dropout_rate=args.dropout,
+            width_mult=1.0,
+            ks=7,
+            expand_ratio=6,
+            depth_param=4,
+        )
+    else:
+        # build net from args
+        args.width_mult_list = [
+            float(width_mult) for width_mult in args.width_mult_list.split(",")
+        ]
+        args.ks_list = [int(ks) for ks in args.ks_list.split(",")]
+        args.expand_list = [int(e) for e in args.expand_list.split(",")]
+        args.depth_list = [int(d) for d in args.depth_list.split(",")]
 
-    args.width_mult_list = (
-        args.width_mult_list[0]
-        if len(args.width_mult_list) == 1
-        else args.width_mult_list
-    )
-    net = OFAMobileNetV3(
-        n_classes=run_config.data_provider.n_classes,
-        bn_param=(args.bn_momentum, args.bn_eps),
-        dropout_rate=args.dropout,
-        base_stage_width=args.base_stage_width,
-        width_mult=args.width_mult_list,
-        ks_list=args.ks_list,
-        expand_ratio_list=args.expand_list,
-        depth_list=args.depth_list,
-    )
+        args.width_mult_list = (
+            args.width_mult_list[0]
+            if len(args.width_mult_list) == 1
+            else args.width_mult_list
+        )
+        net = OFAMobileNetV3(
+            n_classes=run_config.data_provider.n_classes,
+            bn_param=(args.bn_momentum, args.bn_eps),
+            dropout_rate=args.dropout,
+            base_stage_width=args.base_stage_width,
+            width_mult=args.width_mult_list,
+            ks_list=args.ks_list,
+            expand_ratio_list=args.expand_list,
+            depth_list=args.depth_list,
+        )
     # teacher model
     if args.kd_ratio > 0:
         args.teacher_model = MobileNetV3Large(
