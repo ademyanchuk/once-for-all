@@ -31,6 +31,7 @@ parser.add_argument(
     type=str,
     default="depth",
     choices=[
+        "supernet",
         "kernel",
         "depth",
         "expand",
@@ -40,6 +41,16 @@ parser.add_argument("--phase", type=int, default=1, choices=[1, 2])
 parser.add_argument("--resume", action="store_true")
 
 args = parser.parse_args()
+
+args.image_size = None
+if args.task == "supernet":
+    args.path = "exp/supernet"
+    args.dynamic_batch_size = 1
+    args.image_size = "32"
+    args.n_epochs = 180
+    args.base_lr = 0.08125
+    args.warmup_epochs = 5
+    args.warmup_lr = -1
 if args.task == "kernel":
     args.path = "exp/normal2kernel"
     args.dynamic_batch_size = 1
@@ -112,7 +123,8 @@ args.print_frequency = 10
 args.n_worker = 8
 args.resize_scale = 0.08
 args.distort_color = "tf"
-args.image_size = "128,160,192,224"
+if args.image_size is None:
+    args.image_size = "128,160,192,224"
 args.continuous_size = True
 args.not_sync_distributed_image_size = False
 
@@ -122,11 +134,16 @@ args.dropout = 0.1
 args.base_stage_width = "proxyless"
 
 args.width_mult_list = "1.0"
-args.dy_conv_scaling_mode = 1
 args.independent_distributed_sampling = False
 
 args.kd_ratio = 1.0
 args.kd_type = "ce"
+
+# for different params in supernet task
+if args.task == "supernet":
+    args.dy_conv_scaling_mode = -1
+else:
+    args.dy_conv_scaling_mode = 1
 
 
 if __name__ == "__main__":
