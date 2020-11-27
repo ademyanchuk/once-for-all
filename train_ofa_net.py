@@ -142,6 +142,7 @@ args.kd_type = "ce"
 if args.task == "supernet":
     args.dy_conv_scaling_mode = -1
     args.kd_ratio = -1.0  # not using teacher model
+    args.teacher_model = None
 else:
     args.dy_conv_scaling_mode = 1
     args.kd_ratio = 1.0
@@ -269,8 +270,7 @@ if __name__ == "__main__":
 
     # training supernet
     if args.task == "supernet":
-        result = distributed_run_manager.validate(epoch=0, is_test=True)
-        print(result)
+        distributed_run_manager.train(args, warmup_epochs=args.warmup_epochs, warmup_lr=args.warmup_lr)
 
     # training progressive shrinking
     else:
