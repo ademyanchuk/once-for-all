@@ -185,7 +185,7 @@ class Cifar10DataProvider(DataProvider):
     @property
     def normalize(self):
         return transforms.Normalize(
-            mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]
+            mean=[0.4914, 0.4822, 0.4465], std=[0.247, 0.243, 0.261]
         )
 
     def build_train_transform(self, image_size=None, print_log=True):
