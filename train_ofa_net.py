@@ -51,7 +51,7 @@ if args.task == "supernet":
     args.base_lr = 0.08125
     args.warmup_epochs = 5
     args.warmup_lr = -1
-if args.task == "kernel":
+elif args.task == "kernel":
     args.path = "exp/normal2kernel"
     args.dynamic_batch_size = 1
     args.n_epochs = 120
@@ -270,74 +270,76 @@ if __name__ == "__main__":
     # training supernet
     if args.task == "supernet":
         result = distributed_run_manager.validate(epoch=0, is_test=True)
+        print(result)
 
     # training progressive shrinking
-    from ofa.imagenet_classification.elastic_nn.training.progressive_shrinking import (
-        train, validate)
-
-    validate_func_dict = {
-        "image_size_list": {224}
-        if isinstance(args.image_size, int)
-        else sorted({160, 224}),
-        "ks_list": sorted({min(args.ks_list), max(args.ks_list)}),
-        "expand_ratio_list": sorted({min(args.expand_list), max(args.expand_list)}),
-        "depth_list": sorted({min(net.depth_list), max(net.depth_list)}),
-    }
-    if args.task == "kernel":
-        validate_func_dict["ks_list"] = sorted(args.ks_list)
-        if distributed_run_manager.start_epoch == 0:
-            args.ofa_checkpoint_path = download_url(
-                "https://hanlab.mit.edu/files/OnceForAll/ofa_checkpoints/ofa_D4_E6_K7",
-                model_dir=".torch/ofa_checkpoints/%d" % hvd.rank(),
-            )
-            load_models(
-                distributed_run_manager,
-                distributed_run_manager.net,
-                args.ofa_checkpoint_path,
-            )
-            distributed_run_manager.write_log(
-                "%.3f\t%.3f\t%.3f\t%s"
-                % validate(distributed_run_manager, is_test=True, **validate_func_dict),
-                "valid",
-            )
-        else:
-            assert args.resume
-        train(
-            distributed_run_manager,
-            args,
-            lambda _run_manager, epoch, is_test: validate(
-                _run_manager, epoch, is_test, **validate_func_dict
-            ),
-        )
-    elif args.task == "depth":
-        from ofa.imagenet_classification.elastic_nn.training.progressive_shrinking import \
-            train_elastic_depth  # noqa
-
-        if args.phase == 1:
-            args.ofa_checkpoint_path = download_url(
-                "https://hanlab.mit.edu/files/OnceForAll/ofa_checkpoints/ofa_D4_E6_K357",  # noqa
-                model_dir=".torch/ofa_checkpoints/%d" % hvd.rank(),
-            )
-        else:
-            args.ofa_checkpoint_path = download_url(
-                "https://hanlab.mit.edu/files/OnceForAll/ofa_checkpoints/ofa_D34_E6_K357",  # noqa
-                model_dir=".torch/ofa_checkpoints/%d" % hvd.rank(),
-            )
-        train_elastic_depth(train, distributed_run_manager, args, validate_func_dict)
-    elif args.task == "expand":
-        from ofa.imagenet_classification.elastic_nn.training.progressive_shrinking import \
-            train_elastic_expand  # noqa
-
-        if args.phase == 1:
-            args.ofa_checkpoint_path = download_url(
-                "https://hanlab.mit.edu/files/OnceForAll/ofa_checkpoints/ofa_D234_E6_K357",  # noqa
-                model_dir=".torch/ofa_checkpoints/%d" % hvd.rank(),
-            )
-        else:
-            args.ofa_checkpoint_path = download_url(
-                "https://hanlab.mit.edu/files/OnceForAll/ofa_checkpoints/ofa_D234_E46_K357",  # noqa
-                model_dir=".torch/ofa_checkpoints/%d" % hvd.rank(),
-            )
-        train_elastic_expand(train, distributed_run_manager, args, validate_func_dict)
     else:
-        raise NotImplementedError
+        from ofa.imagenet_classification.elastic_nn.training.progressive_shrinking import (
+            train, validate)
+
+        validate_func_dict = {
+            "image_size_list": {224}
+            if isinstance(args.image_size, int)
+            else sorted({160, 224}),
+            "ks_list": sorted({min(args.ks_list), max(args.ks_list)}),
+            "expand_ratio_list": sorted({min(args.expand_list), max(args.expand_list)}),
+            "depth_list": sorted({min(net.depth_list), max(net.depth_list)}),
+        }
+        if args.task == "kernel":
+            validate_func_dict["ks_list"] = sorted(args.ks_list)
+            if distributed_run_manager.start_epoch == 0:
+                args.ofa_checkpoint_path = download_url(
+                    "https://hanlab.mit.edu/files/OnceForAll/ofa_checkpoints/ofa_D4_E6_K7",
+                    model_dir=".torch/ofa_checkpoints/%d" % hvd.rank(),
+                )
+                load_models(
+                    distributed_run_manager,
+                    distributed_run_manager.net,
+                    args.ofa_checkpoint_path,
+                )
+                distributed_run_manager.write_log(
+                    "%.3f\t%.3f\t%.3f\t%s"
+                    % validate(distributed_run_manager, is_test=True, **validate_func_dict),
+                    "valid",
+                )
+            else:
+                assert args.resume
+            train(
+                distributed_run_manager,
+                args,
+                lambda _run_manager, epoch, is_test: validate(
+                    _run_manager, epoch, is_test, **validate_func_dict
+                ),
+            )
+        elif args.task == "depth":
+            from ofa.imagenet_classification.elastic_nn.training.progressive_shrinking import \
+                train_elastic_depth  # noqa
+
+            if args.phase == 1:
+                args.ofa_checkpoint_path = download_url(
+                    "https://hanlab.mit.edu/files/OnceForAll/ofa_checkpoints/ofa_D4_E6_K357",  # noqa
+                    model_dir=".torch/ofa_checkpoints/%d" % hvd.rank(),
+                )
+            else:
+                args.ofa_checkpoint_path = download_url(
+                    "https://hanlab.mit.edu/files/OnceForAll/ofa_checkpoints/ofa_D34_E6_K357",  # noqa
+                    model_dir=".torch/ofa_checkpoints/%d" % hvd.rank(),
+                )
+            train_elastic_depth(train, distributed_run_manager, args, validate_func_dict)
+        elif args.task == "expand":
+            from ofa.imagenet_classification.elastic_nn.training.progressive_shrinking import \
+                train_elastic_expand  # noqa
+
+            if args.phase == 1:
+                args.ofa_checkpoint_path = download_url(
+                    "https://hanlab.mit.edu/files/OnceForAll/ofa_checkpoints/ofa_D234_E6_K357",  # noqa
+                    model_dir=".torch/ofa_checkpoints/%d" % hvd.rank(),
+                )
+            else:
+                args.ofa_checkpoint_path = download_url(
+                    "https://hanlab.mit.edu/files/OnceForAll/ofa_checkpoints/ofa_D234_E46_K357",  # noqa
+                    model_dir=".torch/ofa_checkpoints/%d" % hvd.rank(),
+                )
+            train_elastic_expand(train, distributed_run_manager, args, validate_func_dict)
+        else:
+            raise NotImplementedError
