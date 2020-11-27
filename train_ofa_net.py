@@ -48,7 +48,7 @@ if args.task == "supernet":
     args.dynamic_batch_size = 1
     args.image_size = "32"
     args.n_epochs = 180
-    args.base_lr = 0.08125
+    args.base_lr = 0.1  # cifar10 spec
     args.warmup_epochs = 5
     args.warmup_lr = -1
 elif args.task == "kernel":
@@ -105,13 +105,13 @@ args.manual_seed = 0
 
 args.lr_schedule_type = "cosine"
 
-args.base_batch_size = 64
+args.base_batch_size = 128  # cifar10 spec
 args.valid_size = 10000
 
 args.opt_type = "sgd"
 args.momentum = 0.9
 args.no_nesterov = False
-args.weight_decay = 3e-5
+args.weight_decay = 4e-5  # cifar10 spec
 args.label_smoothing = 0.1
 args.no_decay_keys = "bn#bias"
 args.fp16_allreduce = False
@@ -121,7 +121,7 @@ args.validation_frequency = 1
 args.print_frequency = 10
 
 args.n_worker = 8
-args.resize_scale = 0.08
+args.resize_scale = 0.8  # cifar10 spec
 args.distort_color = "tf"
 if args.image_size is None:
     args.image_size = "128,160,192,224"
