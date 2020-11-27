@@ -267,7 +267,11 @@ if __name__ == "__main__":
             distributed_run_manager, args.teacher_model, model_path=args.teacher_path
         )
 
-    # training
+    # training supernet
+    if args.task == "supernet":
+        result = distributed_run_manager.validate(epoch=0, is_test=True)
+
+    # training progressive shrinking
     from ofa.imagenet_classification.elastic_nn.training.progressive_shrinking import (
         train, validate)
 
