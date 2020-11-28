@@ -47,7 +47,7 @@ if args.task == "supernet":
     args.path = "exp/supernet"
     args.dynamic_batch_size = 1
     args.image_size = "32"
-    args.n_epochs = 180
+    args.n_epochs = 350
     args.base_lr = 0.1  # cifar10 spec
     args.warmup_epochs = 5
     args.warmup_lr = -1
