@@ -130,7 +130,6 @@ args.not_sync_distributed_image_size = False
 
 args.bn_momentum = 0.1
 args.bn_eps = 1e-5
-args.dropout = 0.1
 args.base_stage_width = "proxyless"
 
 args.width_mult_list = "1.0"
@@ -143,9 +142,11 @@ if args.task == "supernet":
     args.dy_conv_scaling_mode = -1
     args.kd_ratio = -1.0  # not using teacher model
     args.teacher_model = None
+    args.dropout = 0.5
 else:
     args.dy_conv_scaling_mode = 1
     args.kd_ratio = 1.0
+    args.dropout = 0.1
 
 
 if __name__ == "__main__":
