@@ -46,9 +46,9 @@ args.image_size = None
 if args.task == "supernet":
     args.path = "exp/supernet"
     args.dynamic_batch_size = 1
-    args.image_size = "32"
+    args.image_size = "224"
     args.n_epochs = 350
-    args.base_lr = 0.1  # cifar10 spec
+    args.base_lr = 0.08  # cifar10 spec
     args.warmup_epochs = 5
     args.warmup_lr = -1
 elif args.task == "kernel":
@@ -105,7 +105,7 @@ args.manual_seed = 0
 
 args.lr_schedule_type = "cosine"
 
-args.base_batch_size = 128  # cifar10 spec
+args.base_batch_size = 96  # cifar10 spec
 args.valid_size = 10000
 
 args.opt_type = "sgd"
@@ -142,7 +142,7 @@ if args.task == "supernet":
     args.dy_conv_scaling_mode = -1
     args.kd_ratio = -1.0  # not using teacher model
     args.teacher_model = None
-    args.dropout = 0.5
+    args.dropout = 0.1
 else:
     args.dy_conv_scaling_mode = 1
     args.kd_ratio = 1.0
@@ -186,7 +186,7 @@ if __name__ == "__main__":
     if args.warmup_lr < 0:
         args.warmup_lr = args.base_lr
     args.train_batch_size = args.base_batch_size
-    args.test_batch_size = args.base_batch_size * 4
+    args.test_batch_size = args.base_batch_size * 2
     run_config = DistributedImageNetRunConfig(
         **args.__dict__, num_replicas=num_gpus, rank=hvd.rank()
     )
