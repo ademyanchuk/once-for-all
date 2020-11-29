@@ -120,9 +120,3 @@ ngrok*
 
 # cifar 10 data
 cifar-10*
-
-# torch checkpoints
-.torch/
-
-# experiment logs
-exp/
