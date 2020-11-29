@@ -5,6 +5,7 @@
 import warnings
 import os
 import math
+from PIL import Image
 import numpy as np
 import torch.utils.data
 import torchvision.transforms as transforms
@@ -23,7 +24,7 @@ class Cifar10DataProvider(DataProvider):
         train_batch_size=256,
         test_batch_size=512,
         valid_size=None,
-        n_worker=32,
+        n_worker=8,
         resize_scale=0.08,
         distort_color=None,
         image_size=32,
@@ -213,7 +214,9 @@ class Cifar10DataProvider(DataProvider):
 
         # random_resize_crop -> random_horizontal_flip
         train_transforms = [
-            resize_transform_class(image_size, scale=(self.resize_scale, 1.0)),
+            resize_transform_class(
+                image_size, scale=(self.resize_scale, 1.0), interpolation=Image.BICUBIC
+            ),
             transforms.RandomHorizontalFlip(),
         ]
 
@@ -243,7 +246,9 @@ class Cifar10DataProvider(DataProvider):
             image_size = self.active_img_size
         return transforms.Compose(
             [
-                transforms.Resize(int(math.ceil(image_size / 0.875))),
+                transforms.Resize(
+                    int(math.ceil(image_size / 0.875)), interpolation=Image.BICUBIC
+                ),
                 transforms.CenterCrop(image_size),
                 transforms.ToTensor(),
                 self.normalize,
