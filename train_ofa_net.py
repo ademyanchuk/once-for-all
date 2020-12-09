@@ -10,16 +10,18 @@ import horovod.torch as hvd
 import numpy as np
 import torch
 
-from ofa.imagenet_classification.elastic_nn.modules.dynamic_op import \
-    DynamicSeparableConv2d
+from ofa.imagenet_classification.elastic_nn.modules.dynamic_op import (
+    DynamicSeparableConv2d,
+)
 from ofa.imagenet_classification.elastic_nn.networks import OFAMobileNetV3
-from ofa.imagenet_classification.elastic_nn.training.progressive_shrinking import \
-    load_models
+from ofa.imagenet_classification.elastic_nn.training.progressive_shrinking import (
+    load_models,
+)
 from ofa.imagenet_classification.networks import MobileNetV3Large
-from ofa.imagenet_classification.run_manager import \
-    DistributedImageNetRunConfig
-from ofa.imagenet_classification.run_manager.distributed_run_manager import \
-    DistributedRunManager
+from ofa.imagenet_classification.run_manager import DistributedImageNetRunConfig
+from ofa.imagenet_classification.run_manager.distributed_run_manager import (
+    DistributedRunManager,
+)
 from ofa.utils import MyRandomResizedCrop, download_url
 
 parser = argparse.ArgumentParser()
@@ -137,16 +139,15 @@ args.independent_distributed_sampling = False
 
 args.kd_type = "ce"
 
+args.dropout = 0.1
 # for different params in supernet task
 if args.task == "supernet":
     args.dy_conv_scaling_mode = -1
     args.kd_ratio = -1.0  # not using teacher model
     args.teacher_model = None
-    args.dropout = 0.1
 else:
     args.dy_conv_scaling_mode = 1
     args.kd_ratio = 1.0
-    args.dropout = 0.1
 
 
 if __name__ == "__main__":
@@ -271,12 +272,16 @@ if __name__ == "__main__":
 
     # training supernet
     if args.task == "supernet":
-        distributed_run_manager.train(args, warmup_epochs=args.warmup_epochs, warmup_lr=args.warmup_lr)
+        distributed_run_manager.train(
+            args, warmup_epochs=args.warmup_epochs, warmup_lr=args.warmup_lr
+        )
 
     # training progressive shrinking
     else:
         from ofa.imagenet_classification.elastic_nn.training.progressive_shrinking import (
-            train, validate)
+            train,
+            validate,
+        )
 
         validate_func_dict = {
             "image_size_list": {224}
@@ -300,7 +305,9 @@ if __name__ == "__main__":
                 )
                 distributed_run_manager.write_log(
                     "%.3f\t%.3f\t%.3f\t%s"
-                    % validate(distributed_run_manager, is_test=True, **validate_func_dict),
+                    % validate(
+                        distributed_run_manager, is_test=True, **validate_func_dict
+                    ),
                     "valid",
                 )
             else:
@@ -313,8 +320,9 @@ if __name__ == "__main__":
                 ),
             )
         elif args.task == "depth":
-            from ofa.imagenet_classification.elastic_nn.training.progressive_shrinking import \
-                train_elastic_depth  # noqa
+            from ofa.imagenet_classification.elastic_nn.training.progressive_shrinking import (
+                train_elastic_depth,
+            )  # noqa
 
             if args.phase == 1:
                 args.ofa_checkpoint_path = download_url(
@@ -326,10 +334,13 @@ if __name__ == "__main__":
                     "https://hanlab.mit.edu/files/OnceForAll/ofa_checkpoints/ofa_D34_E6_K357",  # noqa
                     model_dir=".torch/ofa_checkpoints/%d" % hvd.rank(),
                 )
-            train_elastic_depth(train, distributed_run_manager, args, validate_func_dict)
+            train_elastic_depth(
+                train, distributed_run_manager, args, validate_func_dict
+            )
         elif args.task == "expand":
-            from ofa.imagenet_classification.elastic_nn.training.progressive_shrinking import \
-                train_elastic_expand  # noqa
+            from ofa.imagenet_classification.elastic_nn.training.progressive_shrinking import (
+                train_elastic_expand,
+            )  # noqa
 
             if args.phase == 1:
                 args.ofa_checkpoint_path = download_url(
@@ -341,6 +352,8 @@ if __name__ == "__main__":
                     "https://hanlab.mit.edu/files/OnceForAll/ofa_checkpoints/ofa_D234_E46_K357",  # noqa
                     model_dir=".torch/ofa_checkpoints/%d" % hvd.rank(),
                 )
-            train_elastic_expand(train, distributed_run_manager, args, validate_func_dict)
+            train_elastic_expand(
+                train, distributed_run_manager, args, validate_func_dict
+            )
         else:
             raise NotImplementedError
